@@ -3,6 +3,7 @@ package databases
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -85,5 +86,102 @@ func TestComplexSelect(t *testing.T) {
 		fmt.Println("Created At:", created_at)
 		fmt.Println("Married:", married)
 		fmt.Println("-----")
+	}
+}
+
+func TestSqlWithParams(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+
+	ctx := context.Background()
+
+	username := "user1"
+	password := "user1"
+
+	query := "SELECT username FROM user WHERE username = ? AND password = ? LIMIT 1"
+	// fmt.Println(query)
+
+	rows, err := db.QueryContext(ctx, query, username, password)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		var username string
+		err := rows.Scan(&username)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Login success:", username)
+	} else {
+		fmt.Println("Failed to login: User not found")
+	}
+
+}
+
+func TestExeWithParams(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+
+	ctx := context.Background()
+
+	username := "user2"
+	password := "user2"
+
+	query := "INSERT INTO user(username, password) VALUES(?, ?)"
+
+	_, err := db.ExecContext(ctx, query, username, password)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Inserted Successfuly")
+}
+
+func TestLastInsertId(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+
+	ctx := context.Background()
+
+	email := "yokubo@go.dev"
+	comment := "This is a test comment 2"
+
+	querry := "INSERT INTO comments(email, comment) VALUES (?, ?) "
+	result, err := db.ExecContext(ctx, querry, email, comment)
+	if err != nil {
+		panic(err)
+	}
+
+	insert, err := result.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Success insert new comment with id:", insert)
+}
+
+func TestPrepareStatement(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+
+	ctx := context.Background()
+	query := "INSERT INTO comments(email, comment) VALUES (?, ?)"
+
+	statement, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		panic(err)
+	}
+	defer statement.Close()
+
+	for i := 0; i < 10; i++ {
+		email := "Yoku" + strconv.Itoa(i) + "@go.dev"
+		comment := "This is comment number " + strconv.Itoa(i)
+		res, err := statement.ExecContext(ctx, email, comment)
+		if err != nil {
+			panic(err)
+		}
+		lastInsertedId, _ := res.LastInsertId()
+		fmt.Println("Success insert new comment with id:", lastInsertedId)
 	}
 }
