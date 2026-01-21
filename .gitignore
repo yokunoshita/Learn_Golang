@@ -1,0 +1,12 @@
+# Local Environment Variables
+.env
+# Compiled Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Test Binary
+*.test
+# Output of the go coverage tool
+*.out
