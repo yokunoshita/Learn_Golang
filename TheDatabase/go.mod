@@ -1,4 +1,4 @@
-module databases
+module TheDatabase
 
 go 1.23.3
 

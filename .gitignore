@@ -6,7 +6,5 @@
 *.dll
 *.so
 *.dylib
-# Test Binary
-*.test
 # Output of the go coverage tool
 *.out

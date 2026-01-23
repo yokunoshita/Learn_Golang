@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// TestExeSql demonstrates how to execute a simple SQL insert statement using ExecContext.
 func TestExeSql(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -24,6 +25,7 @@ func TestExeSql(t *testing.T) {
 	fmt.Println("Inserted Successfuly")
 }
 
+// TestSelectSql demonstrates how to select data from a database table and scan the results into Go variables.
 func TestSelectSql(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -51,6 +53,7 @@ func TestSelectSql(t *testing.T) {
 	}
 }
 
+// TestComplexSelect demonstrates how to select multiple data types from a database table and scan them into appropriate Go variables.
 func TestComplexSelect(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -89,6 +92,7 @@ func TestComplexSelect(t *testing.T) {
 	}
 }
 
+// TestSqlWithParams demonstrates how to use parameters in an SQL query to prevent SQL injection attacks.
 func TestSqlWithParams(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -120,6 +124,7 @@ func TestSqlWithParams(t *testing.T) {
 
 }
 
+// TestExeWithParams demonstrates how to execute an SQL statement with parameters to insert a new user into the database.
 func TestExeWithParams(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -139,6 +144,7 @@ func TestExeWithParams(t *testing.T) {
 	fmt.Println("Inserted Successfuly")
 }
 
+// TestLastInsertId demonstrates how to retrieve the ID of the last inserted record in a database table.
 func TestLastInsertId(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -146,7 +152,7 @@ func TestLastInsertId(t *testing.T) {
 	ctx := context.Background()
 
 	email := "yokubo@go.dev"
-	comment := "This is a test comment 2"
+	comment := "This is a test comment 1"
 
 	querry := "INSERT INTO comments(email, comment) VALUES (?, ?) "
 	result, err := db.ExecContext(ctx, querry, email, comment)
@@ -161,6 +167,7 @@ func TestLastInsertId(t *testing.T) {
 	fmt.Println("Success insert new comment with id:", insert)
 }
 
+// TestPrepareStatement demonstrates the use of prepared statements for executing the same SQL statement multiple times with different parameters.
 func TestPrepareStatement(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
@@ -183,5 +190,35 @@ func TestPrepareStatement(t *testing.T) {
 		}
 		lastInsertedId, _ := res.LastInsertId()
 		fmt.Println("Success insert new comment with id:", lastInsertedId)
+	}
+}
+
+func TestTransaction(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+	ctx := context.Background()
+
+	tx, err := db.Begin()
+	if err != nil {
+		panic(err)
+	}
+
+	query := "INSERT INTO comments(email, comment) VALUES (?, ?)"
+
+	for i := 0; i < 10; i++ {
+
+		email := "Yoku" + strconv.Itoa(i) + "@go.dev"
+		comment := "This is comment number " + strconv.Itoa(i)
+
+		_, err := tx.ExecContext(ctx, query, email, comment)
+		if err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+	}
+	fmt.Println("Success insert new comments")
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
 	}
 }
