@@ -59,3 +59,15 @@ func TestMultipleParams(t *testing.T) {
 
 	fmt.Println(string(body))
 }
+
+func TestMultipleParams2(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:9000/hello?name=Yoku&name=Dake&name=Han", nil)
+	record := httptest.NewRecorder()
+
+	MultipleParams2(record, request)
+
+	response := record.Result()
+	body, _ := io.ReadAll(response.Body)
+
+	fmt.Println(string(body))
+}
