@@ -21,19 +21,6 @@ func SayHello(writter http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// example of query parameter
-func TestQueryParams(t *testing.T) {
-	request := httptest.NewRequest(http.MethodGet, "http://localhost:8000/hello?name=Yoku", nil)
-	record := httptest.NewRecorder()
-
-	SayHello(record, request)
-
-	response := record.Result()
-	body, _ := io.ReadAll(response.Body)
-
-	fmt.Println(string(body))
-}
-
 // example of multiple query parameters
 func MultipleParams(writer http.ResponseWriter, request *http.Request) {
 	firstname := request.URL.Query().Get("firstName")
@@ -46,6 +33,18 @@ func MultipleParams2(writter http.ResponseWriter, request *http.Request) {
 	var query url.Values = request.URL.Query()
 	var names []string = query["name"]
 	fmt.Fprintln(writter, strings.Join(names, ","))
+}
+
+func TestQueryParams(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8000/hello?name=Yoku", nil)
+	record := httptest.NewRecorder()
+
+	SayHello(record, request)
+
+	response := record.Result()
+	body, _ := io.ReadAll(response.Body)
+
+	fmt.Println(string(body))
 }
 
 func TestMultipleParams(t *testing.T) {
